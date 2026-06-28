@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT Digital Footprint Analyzer</title>
+    
+    <style>
+        /* 🎨 સુધારેલી પરફેક્ટ ઓફલાઇન સીએસએસ ડિઝાઇન */
+        body { 
+            background-color: #0f172a; 
+            color: #f1f5f9; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 0; 
+        }
+        header { 
+            border-bottom: 1px solid #1e293b; 
+            background-color: #020617; 
+            padding: 16px 24px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        header h1 { 
+            color: #22d3ee; 
+            margin: 0; 
+            font-size: 20px; 
+            letter-spacing: 1px; 
+        }
+        .badge { 
+            font-size: 12px; 
+            background-color: #1e293b; 
+            color: #94a3b8; 
+            padding: 4px 12px; 
+            border-radius: 9999px; 
+            border: 1px solid #334155; 
+        }
+        main { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 48px 16px; 
+        }
+        .hero { 
+            text-align: center; 
+            margin-bottom: 40px; 
+        }
+        .hero h2 { 
+            font-size: 36px; 
+            color: #ffffff; 
+            margin-bottom: 12px; 
+        }
+        .hero p { 
+            color: #94a3b8; 
+            font-size: 16px; 
+            margin: 0; 
+        }
+        .search-box { 
+            background-color: #020617; 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid #1e293b; 
+            box-sizing: border-box;
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 32px; 
+        }
+        input[type="text"] { 
+            flex: 1; 
+            background-color: #0f172a; 
+            border: 1px solid #334155; 
+            border-radius: 12px; 
+            padding: 12px 16px; 
+            color: white; 
+            font-size: 16px; 
+            outline: none; 
+        }
+        input[type="text"]:focus { 
+            border-color: #22d3ee; 
+        }
+        button { 
+            background-color: #0891b2; 
+            color: white; 
+            font-weight: 600; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            border: none; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        button:hover { 
+            background-color: #06b6d4; 
+        }
+        .hidden { 
+            display: none !important; 
+        }
+        #loadingStatus { 
+            text-align: center; 
+            padding: 24px 0; 
+            color: #22d3ee; 
+            font-family: monospace; 
+        }
+        #resultsDashboard { 
+            margin-top: 32px; 
+        }
+        .dashboard-title { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: #cbd5e1; 
+            border-bottom: 1px solid #1e293b; 
+            padding-bottom: 12px; 
+            margin-bottom: 24px; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 16px; 
+        }
+        .card { 
+            background-color: #020617; 
+            border: 1px solid #1e293b; 
+            border-radius: 12px; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            flex-direction: column; 
+        }
+        .card-header { 
+            font-weight: bold; 
+            font-size: 18px; 
+            margin-bottom: 12px; 
+        }
+        .status-badge { 
+            display: inline-block; 
+            padding: 4px 10px; 
+            font-size: 12px; 
+            font-weight: 500; 
+            border-radius: 12px; 
+            width: fit-content; 
+        }
+        .status-found { 
+            color: #34d399 !important; 
+            background: rgba(6, 78, 59, 0.4); 
+            border: 1px solid #047857; 
+        }
+        .status-notfound { 
+            color: #f43f5e; 
+            background: rgba(76, 5, 25, 0.4); 
+            border: 1px solid #be123c; 
+        }
+        .card-link { 
+            margin-top: 16px; 
+            padding-top: 12px; 
+            border-top: 1px solid #1e293b; 
+        }
+        .card-link a { 
+            color: #22d3ee; 
+            text-decoration: none; 
+            font-size: 14px; 
+        }
+        .card-link a:hover { 
+            text-decoration: underline; 
+        }
+        footer { 
+            text-align: center; 
+            font-size: 12px; 
+            color: #475569; 
+            margin-top: 64px; 
+            padding-top: 24px; 
+            border-top: 1px solid #020617; 
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>OSINT_ANALYZER v1.0</h1>
+        <span class="badge">Academic Project (Sem 5)</span>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        <div class="hero">
+            <h2>Trace Digital Footprints</h2>
+            <p>Enter a target username to scan across multiple public platforms instantly.</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="search-box">
+            <input type="text" id="usernameInput" placeholder="Enter target username (e.g., torvalds)">
+            <button onclick="startOSINTScan()">Start Scan</button>
+        </div>
+
+        <!-- Loading Status -->
+        <div id="loadingStatus" class="hidden">
+            Querying servers... Scraping public OSINT repositories...
+        </div>
+
+        <!-- Results Dashboard -->
+        <div id="resultsDashboard" class="hidden">
+            <div class="dashboard-title">
+                <span>Scan Intelligence Report</span>
+                <span id="targetBadge" style="color: #22d3ee;">Target: None</span>
+            </div>
+            <div id="platformCardsGrid" class="grid">
+                <!-- Cards will load here -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 OSINT Tracker. Built for College Semester 5 Evaluation.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

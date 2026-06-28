@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LUXE — Premium Timepieces</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#c9a84c" />
+</head>
+<body>
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+    <div class="toast-container" id="toastContainer"></div>
+    <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">↑</button>
+
+    <!-- Theme Customizer -->
+    <div class="theme-customizer" id="themeCustomizer">
+        <button class="theme-customizer-toggle" onclick="toggleThemeCustomizer()" aria-label="Customize theme">🎨</button>
+        <div class="theme-customizer-panel" id="themeCustomizerPanel">
+            <h4>Theme Settings</h4>
+            <div class="customizer-section">
+                <label>Mode</label>
+                <div class="toggle-group">
+                    <button onclick="setThemeMode('dark')" class="active" data-mode="dark">Dark</button>
+                    <button onclick="setThemeMode('light')" data-mode="light">Light</button>
+                </div>
+            </div>
+            <div class="customizer-section">
+                <label>Accent Color</label>
+                <div class="color-picker">
+                    <button onclick="setAccentColor('#c9a84c')" class="color-btn active" style="background:#c9a84c" data-color="#c9a84c"></button>
+                    <button onclick="setAccentColor('#e74c3c')" class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></button>
+                    <button onclick="setAccentColor('#3498db')" class="color-btn" style="background:#3498db" data-color="#3498db"></button>
+                    <button onclick="setAccentColor('#2ecc71')" class="color-btn" style="background:#2ecc71" data-color="#2ecc71"></button>
+                    <button onclick="setAccentColor('#9b59b6')" class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></button>
+                    <button onclick="setAccentColor('#f39c12')" class="color-btn" style="background:#f39c12" data-color="#f39c12"></button>
+                </div>
+            </div>
+            <div class="customizer-section">
+                <label>Language</label>
+                <select id="languageSelect" onchange="changeLanguage(this.value)">
+                    <option value="en">English</option>
+                    <option value="gu">ગુજરાતી</option>
+                </select>
+            </div>
+            <div class="customizer-section">
+                <label>Currency</label>
+                <select id="currencySelect" onchange="changeCurrency(this.value)">
+                    <option value="INR">₹ INR</option>
+                    <option value="USD">$ USD</option>
+                    <option value="EUR">€ EUR</option>
+                    <option value="GBP">£ GBP</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendation Modal -->
+    <div class="modal-overlay" id="aiModal" onclick="closeModal('aiModal')"></div>
+    <div class="modal" id="aiModalContent">
+        <div class="modal-header">
+            <h3>🤖 AI Watch Recommendation</h3>
+            <button class="modal-close" onclick="closeModal('aiModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="ai-form">
+                <div class="form-group">
+                    <label>Your Budget</label>
+                    <input type="range" id="aiBudget" min="50000" max="5000000" step="50000" value="1000000" oninput="updateBudgetDisplay(this.value)">
+                    <div class="budget-display" id="budgetDisplay">₹10,00,000</div>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Brand</label>
+                    <select id="aiBrand">
+                        <option value="">Any Brand</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="aiCategory">
+                        <option value="">Any Category</option>
+                        <option value="Luxury">Luxury</option>
+                        <option value="Sports">Sports</option>
+                        <option value="Classic">Classic</option>
+                    </select>
+                </div>
+                <button class="btn-primary" onclick="getAIRecommendation()">Get Recommendations</button>
+            </div>
+            <div class="ai-results" id="aiResults"></div>
+        </div>
+    </div>
+
+    <!-- Compare Modal -->
+    <div class="modal-overlay" id="compareModal" onclick="closeModal('compareModal')"></div>
+    <div class="modal modal-large" id="compareModalContent">
+        <div class="modal-header">
+            <h3>⌚ Compare Watches</h3>
+            <button class="modal-close" onclick="closeModal('compareModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="compare-selection" id="compareSelection">
+                <p>Select up to 3 watches to compare</p>
+                <div class="compare-grid" id="compareGrid"></div>
+            </div>
+            <div class="compare-results" id="compareResults"></div>
+        </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="modal-overlay" id="productModal" onclick="closeModal('productModal')"></div>
+    <div class="modal modal-large" id="productModalContent">
+        <div class="modal-header">
+            <h3 id="productModalTitle">Watch Details</h3>
+            <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="product-detail" id="productDetail"></div>
+        </div>
+    </div>
+
+    <!-- Flash Sale Banner -->
+    <div class="flash-sale-banner" id="flashSaleBanner" style="display:none;">
+        <div class="flash-sale-content">
+            <span class="flash-badge">🔥 FLASH SALE</span>
+            <span class="flash-text">Up to 30% off on selected watches!</span>
+            <div class="flash-countdown" id="flashCountdown">Ends in: 04:23:59</div>
+            <button class="flash-close" onclick="closeFlashSale()">✕</button>
+        </div>
+    </div>
+
+    <!-- Coupon Banner -->
+    <div class="coupon-banner" id="couponBanner">
+        <div class="coupon-content">
+            <span>🎁 Use code <strong>LUXE2025</strong> for 10% off your first order!</span>
+            <button class="coupon-close" onclick="closeCouponBanner()">✕</button>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-logo">⌚ LUXE <small>| TIMEPIECES</small></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about" data-i18n="story">Story</a></li>
+            <li><a href="#products" data-i18n="collection">Collection</a></li>
+            <li><a href="#contact" data-i18n="connect">Connect</a></li>
+            <li><a href="#newsletter" data-i18n="insider">Insider</a></li>
+            <li><a href="#" onclick="openAIModal()" data-i18n="aiRecommend">🤖 AI Recommend</a></li>
+            <li><a href="#" onclick="openCompareModal()" data-i18n="compare">⌚ Compare</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="toggleSidebar('recentlyViewed')" aria-label="Recently Viewed">🕐</button>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌓</button>
+            <button class="nav-btn" onclick="toggleSidebar('wishlist')" aria-label="Wishlist">♡</button>
+            <button class="nav-btn" onclick="toggleSidebar('cart')" aria-label="Cart">🛒<span class="badge" id="cartCount">0</span></button>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 id="sidebarTitle">Your <span>Collection</span></h3>
+            <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+        </div>
+        <div class="sidebar-tabs" id="sidebarTabs">
+            <button class="active" data-tab="cart" onclick="switchSidebarTab('cart')">Cart</button>
+            <button data-tab="wishlist" onclick="switchSidebarTab('wishlist')">Wishlist</button>
+            <button data-tab="recentlyViewed" onclick="switchSidebarTab('recentlyViewed')">Recently Viewed</button>
+        </div>
+        <div class="sidebar-body" id="sidebarBody"></div>
+        <div class="sidebar-footer" id="sidebarFooter"></div>
+    </div>
+
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <p class="hero-tag">Est. 2025 • Ahmedabad</p>
+            <h1 class="hero-title">Timeless<br /><span>Elegance</span></h1>
+            <p class="hero-sub">Luxury Watches · Swiss & Beyond</p>
+            <div class="hero-btns">
+                <a href="#products" class="btn-primary">Explore Collection</a>
+                <a href="#contact" class="btn-outline">Visit Store</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <p class="section-tag">Our Story</p>
+            <h2 class="section-title">Crafted with <em>Precision</em></h2>
+            <div class="about-inner reveal">
+                <div class="about-card">
+                    <div class="owner-name">Panchal Mihir</div>
+                    <div class="owner-role">Founder & Watch Curator</div>
+                    <p class="about-text">Luxury Watch Co. is Ahmedabad's destination for horological excellence — from iconic Swiss brands to independent artisans. Every timepiece is handpicked for its heritage, movement, and design.</p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat"><div class="stat-num">400+</div><div class="stat-label">Happy Collectors</div></div>
+                    <div class="stat"><div class="stat-num">12+</div><div class="stat-label">Luxury Brands</div></div>
+                    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Authentic</div></div>
+                    <div class="stat"><div class="stat-num">2-Yr</div><div class="stat-label">Warranty</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="products">
+        <div class="container">
+            <p class="section-tag">Signature Selection</p>
+            <h2 class="section-title">Our <em>Collection</em></h2>
+            
+            <!-- Recently Viewed Section -->
+            <div class="recently-viewed-section" id="recentlyViewedSection" style="display:none;">
+                <h4>Recently Viewed</h4>
+                <div class="recently-viewed-grid" id="recentlyViewedGrid"></div>
+            </div>
+
+            <div class="filter-bar">
+                <select id="filterBrand" onchange="applyFilters()"><option value="">All Brands</option></select>
+                <select id="filterCategory" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Classic">Classic</option>
+                </select>
+                <input type="text" id="filterSearch" placeholder="Search watches..." oninput="applyFilters()" />
+                <select id="filterSort" onchange="applyFilters()">
+                    <option value="default">Sort by</option>
+                    <option value="price-asc">Price: Low → High</option>
+                    <option value="price-desc">Price: High → Low</option>
+                    <option value="name">Name A → Z</option>
+                    <option value="rating">Rating</option>
+                </select>
+                <button class="filter-clear" onclick="clearFilters()">Clear</button>
+            </div>
+
+            <!-- Applied Coupons Display -->
+            <div class="applied-coupons" id="appliedCoupons" style="display:none;">
+                <span>Applied: <strong id="appliedCouponCode"></strong> <span id="appliedCouponDiscount"></span></span>
+                <button onclick="removeCoupon()">Remove</button>
+            </div>
+
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+    </section>
+
+    <section id="newsletter">
+        <div class="newsletter-box reveal">
+            <h3>Join the <span style="color:var(--gold);">Inner Circle</span></h3>
+            <p>Be the first to know about new arrivals, private sales, and exclusive events.</p>
+            <form class="newsletter-form" onsubmit="return handleNewsletter(event)">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <p class="section-tag">Connect</p>
+            <h2 class="section-title">Get In <em>Touch</em></h2>
+            <div class="contact-inner reveal">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div><div class="contact-label">Call / WhatsApp</div><div class="contact-value">+91 87330 30195</div></div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div><div class="contact-label">Email</div><div class="contact-value">panchalbindu98@gmail.com</div></div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <div class="contact-label">Showroom</div>
+                            <div class="contact-value">Adeshver Nagar, Naroda, Ahmedabad - 382330</div>
+                            <div class="map-container"><div id="liveMap"></div></div>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/918733030195?text=Hello%20Luxury%20Watch%20Co." target="_blank" class="btn-whatsapp">💬 WhatsApp Inquiries</a>
+                </div>
+                <form class="contact-form" id="contactForm" onsubmit="return handleContactForm(event)">
+                    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="nameInput" type="text" placeholder="Your name" required /></div>
+                    <div class="form-group"><label class="form-label">Phone / Email</label><input class="form-input" id="contactInfo" type="text" placeholder="+91 or email" required /></div>
+                    <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="msgText" placeholder="Which watch are you looking for?"></textarea></div>
+                    <button type="submit" class="btn-send">Send Enquiry →</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Tracking Section -->
+    <section id="orderTracking" style="display:none;">
+        <div class="container">
+            <p class="section-tag">Track Your Order</p>
+            <h2 class="section-title">Order <em>Status</em></h2>
+            <div class="tracking-container" id="trackingContainer">
+                <div class="tracking-timeline" id="trackingTimeline"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Dashboard (Admin Only) -->
+    <section id="analytics" style="display:none;">
+        <div class="container">
+            <p class="section-tag">Analytics</p>
+            <h2 class="section-title">Sales & <em>Insights</em></h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <h4>Total Sales</h4>
+                    <div class="analytics-value" id="totalSales">₹0</div>
+                </div>
+                <div class="analytics-card">
+                    <h4>Orders</h4>
+                    <div class="analytics-value" id="totalOrders">0</div>
+                </div>
+                <div class="analytics-card">
+                    <h4>Customers</h4>
+                    <div class="analytics-value" id="totalCustomers">0</div>
+                </div>
+                <div class="analytics-card">
+                    <h4>Avg Order</h4>
+                    <div class="analytics-value" id="avgOrder">₹0</div>
+                </div>
+            </div>
+            <div class="chart-container" id="salesChart"></div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="nav-logo">⌚ LUXE <small>| TIMEPIECES</small></div>
+        <div class="footer-links">
+            <a href="#" onclick="showOrderTracking()">Track Order</a>
+            <a href="#" onclick="downloadInvoice()">Download Invoice</a>
+            <a href="#" onclick="shareWishlist()">Share Wishlist</a>
+        </div>
+        <div class="footer-socials">
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="Pinterest">PT</a>
+            <a href="#" aria-label="Facebook">FB</a>
+        </div>
+        <div class="footer-copy">© 2026 Panchal Mihir — NEP Semester 5. All rights reserved.</div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

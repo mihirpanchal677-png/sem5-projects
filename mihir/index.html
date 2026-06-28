@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LUXE — Premium Timepieces</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+    <!-- ============================================================
+    CURSOR ELEMENTS
+    ============================================================ -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
+
+    <!-- ============================================================
+    TOAST
+    ============================================================ -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ============================================================
+    SCROLL TOP
+    ============================================================ -->
+    <button class="scroll-top" id="scrollTop" aria-label="Scroll to top">↑</button>
+
+    <!-- ============================================================
+    NAVIGATION
+    ============================================================ -->
+    <nav>
+        <div class="nav-logo">⌚ LUXE <small>| TIMEPIECES</small></div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">Story</a></li>
+            <li><a href="#products">Collection</a></li>
+            <li><a href="#contact">Connect</a></li>
+            <li><a href="#newsletter">Insider</a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌓</button>
+            <button class="nav-btn" onclick="toggleSidebar('wishlist')" aria-label="Wishlist">
+                ♡
+                <span class="badge" id="wishlistCount">0</span>
+            </button>
+            <button class="nav-btn" onclick="toggleSidebar('cart')" aria-label="Cart">
+                🛒
+                <span class="badge" id="cartCount">0</span>
+            </button>
+            <button class="nav-toggle" id="navToggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ============================================================
+    SIDEBAR
+    ============================================================ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Your <span>Collection</span></h3>
+            <button class="sidebar-close" onclick="closeSidebar()">✕</button>
+        </div>
+        <div class="sidebar-tabs">
+            <button class="active" data-tab="cart" onclick="switchSidebarTab('cart')">Cart</button>
+            <button data-tab="wishlist" onclick="switchSidebarTab('wishlist')">Wishlist</button>
+        </div>
+        <div class="sidebar-body" id="sidebarBody"></div>
+        <div class="sidebar-footer" id="sidebarFooter"></div>
+    </div>
+
+    <div class="modal-overlay" id="productModalOverlay" onclick="closeProductModal()"></div>
+    <div class="product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" onclick="closeProductModal()" aria-label="Close product view">✕</button>
+        <div class="modal-card">
+            <div class="modal-image">
+                <img id="modalImage" src="" alt="Product image" loading="lazy" />
+            </div>
+            <div class="modal-content">
+                <div class="modal-category" id="modalCategory"></div>
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <div class="modal-meta">
+                    <span class="modal-brand" id="modalBrand"></span>
+                    <span class="modal-rating" id="modalRating"></span>
+                </div>
+                <p class="modal-description" id="modalDescription"></p>
+                <div class="modal-stock" id="modalStock"></div>
+                <div class="modal-price" id="modalPrice"></div>
+                <div class="modal-actions">
+                    <button class="btn-primary" id="modalAddCart">Add to Cart</button>
+                    <button class="btn-outline" id="modalWishlist">Wishlist</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    HERO
+    ============================================================ -->
+    <section class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <p class="hero-tag">Est. 2025 • Ahmedabad</p>
+            <h1 class="hero-title">Timeless<br /><span>Elegance</span></h1>
+            <p class="hero-sub">Luxury Watches · Swiss &amp; Beyond</p>
+            <div class="hero-btns">
+                <a href="#products" class="btn-primary">Explore Collection</a>
+                <a href="#contact" class="btn-outline">Visit Store</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    ABOUT
+    ============================================================ -->
+    <section id="about">
+        <div class="container">
+            <p class="section-tag">Our Story</p>
+            <h2 class="section-title">Crafted with <em>Precision</em></h2>
+            <div class="about-inner reveal">
+                <div class="about-card">
+                    <div class="owner-name">Panchal Mihir</div>
+                    <div class="owner-role">Founder &amp; Watch Curator</div>
+                    <p class="about-text">
+                        Luxury Watch Co. is Ahmedabad's destination for horological excellence —
+                        from iconic Swiss brands to independent artisans. Every timepiece is
+                        handpicked for its heritage, movement, and design. We partner with
+                        Rolex, Omega, Tag Heuer, Patek Philippe, Audemars Piguet, and more.
+                        Our mission is to connect collectors with the stories behind each watch.
+                    </p>
+                </div>
+                <div class="about-stats">
+                    <div class="stat"><div class="stat-num">400+</div><div class="stat-label">Happy Collectors</div></div>
+                    <div class="stat"><div class="stat-num">12+</div><div class="stat-label">Luxury Brands</div></div>
+                    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Authentic</div></div>
+                    <div class="stat"><div class="stat-num">2-Yr</div><div class="stat-label">Warranty</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    PRODUCTS
+    ============================================================ -->
+    <section id="products">
+        <div class="container">
+            <p class="section-tag">Signature Selection</p>
+            <h2 class="section-title">Our <em>Collection</em></h2>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <select id="filterBrand" onchange="applyFilters()">
+                    <option value="">All Brands</option>
+                </select>
+                <select id="filterCategory" onchange="applyFilters()">
+                    <option value="">All Categories</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Classic">Classic</option>
+                    <option value="Smart">Smart</option>
+                </select>
+                <input type="text" id="filterSearch" placeholder="Search watches..." oninput="applyFilters()" />
+                <div class="price-filter">
+                    <input type="number" id="filterPriceMin" min="0" placeholder="Min price" oninput="applyFilters()" />
+                    <input type="number" id="filterPriceMax" min="0" placeholder="Max price" oninput="applyFilters()" />
+                </div>
+                <div class="filter-sort">
+                    <select id="filterSort" onchange="applyFilters()">
+                        <option value="default">Sort by</option>
+                        <option value="price-asc">Price: Low → High</option>
+                        <option value="price-desc">Price: High → Low</option>
+                        <option value="name">Name A → Z</option>
+                        <option value="rating">Rating</option>
+                    </select>
+                </div>
+                <button class="filter-clear" onclick="clearFilters()">Clear</button>
+            </div>
+
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    NEWSLETTER
+    ============================================================ -->
+    <section id="newsletter">
+        <div class="newsletter-box reveal">
+            <h3>Join the <span style="color:var(--gold);">Inner Circle</span></h3>
+            <p>Be the first to know about new arrivals, private sales, and exclusive events.</p>
+            <form class="newsletter-form" onsubmit="return handleNewsletter(event)">
+                <input type="email" placeholder="Enter your email" required />
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    CONTACT
+    ============================================================ -->
+    <section id="contact">
+        <div class="container">
+            <p class="section-tag">Connect</p>
+            <h2 class="section-title">Get In <em>Touch</em></h2>
+            <div class="contact-inner reveal">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <div class="contact-label">Call / WhatsApp</div>
+                            <div class="contact-value">+91 87330 30195</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <div class="contact-label">Email</div>
+                            <div class="contact-value">panchalbindu98@gmail.com</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <div class="contact-label">Showroom</div>
+                            <div class="contact-value">Adeshver Nagar, Naroda, Ahmedabad - 382330</div>
+                            <div class="map-container"><div id="liveMap"></div></div>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/918733030195?text=Hello%20Luxury%20Watch%20Co.%2C%20I'm%20interested%20in%20your%20premium%20timepieces!" target="_blank" class="btn-whatsapp">
+                        💬 WhatsApp Inquiries
+                    </a>
+                </div>
+                <form class="contact-form" id="contactForm" onsubmit="return handleContactForm(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input class="form-input" id="nameInput" type="text" placeholder="Your name" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone / Email</label>
+                        <input class="form-input" id="contactInfo" type="text" placeholder="+91 or email" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-textarea" id="msgText" placeholder="Which watch are you looking for?"></textarea>
+                    </div>
+                    <button type="submit" class="btn-send">Send Enquiry →</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+    FOOTER
+    ============================================================ -->
+    <footer>
+        <div class="nav-logo">⌚ LUXE <small>| TIMEPIECES</small></div>
+        <div class="footer-socials">
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="YouTube">YT</a>
+            <a href="#" aria-label="Pinterest">PT</a>
+            <a href="#" aria-label="Facebook">FB</a>
+        </div>
+        <div class="footer-copy">© 2026 Panchal Mihir — NEP Semester 5. All rights reserved.</div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
